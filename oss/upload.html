@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image</title>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <button onclick="uploadImage()">Upload Image</button>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                console.error('No file selected');
+                return;
+            }
+
+            // 后端生成的临时 URL
+            const temporaryUrl = 'https://mgame.s3.dualstack.ap-northeast-1.amazonaws.com/temp/test/temp_img.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWNYZMOTVOJPJZ75Q%2F20240528%2Fap-northeast-1%2Fs3%2Faws4_request&X-Amz-Date=20240528T075911Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=974b5b6fe4c8c22e808acafdc2bc30647d95ab29ec236a8d4eb289d18564d9a2';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(temporaryUrl, {
+                    method: 'PUT',
+                    body: file,
+                    headers: {
+                        'Content-Type': file.type
+                    }
+                });
+
+                if (response.ok) {
+                    console.log('File uploaded successfully');
+                } else {
+                    console.error('File upload failed');
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        }
+    </script>
+</body>
+</html>

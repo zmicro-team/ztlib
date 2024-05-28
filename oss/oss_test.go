@@ -12,13 +12,14 @@ import (
 )
 
 var TestCfg = OssUtilConfig{
+	
 	EndPoint:        "s3.amazonaws.com", // aws s3 endpoint
-	AccessKeyID:     "your_access_key_here",
-	SecretAccessKey: "your_secret_key_here",
-	BucketName:      "zlbgame",
+	AccessKeyID:     "",
+	SecretAccessKey: "",
+	BucketName:      "mgame",
 	Dir:             "temp",
 	UseSSL:          true,
-	Region:          "us-east-1",
+	Region:          "ap-northeast-1",
 }
 
 //go:embed image.png
@@ -38,7 +39,7 @@ func TestMakeBucket(t *testing.T) {
 
 func TestS3GenerateAWSPutTempUrl(t *testing.T) {
 	ossUtil := NewOssUtil(TestCfg)
-	dir := "temp/temp_img.png"
+	dir := "test/temp_img.png"
 	token, err := ossUtil.GenerateAWSPutTempUrl(dir, time.Hour)
 	if err != nil {
 		t.Errorf("failed to generate token: %v", err)
