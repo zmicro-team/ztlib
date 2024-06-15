@@ -1,3 +1,5 @@
+// +build ignore
+
 package oss
 
 import (
@@ -11,8 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO: 测试配置修改为环境变量或者测试配置文件
+
 var TestCfg = OssUtilConfig{
-	
 	EndPoint:        "s3.amazonaws.com", // aws s3 endpoint
 	AccessKeyID:     "",
 	SecretAccessKey: "",
