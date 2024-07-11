@@ -67,13 +67,13 @@ func NewFieldValidator(options ...SetFieldValidatorOption) IFieldValidator {
 	for _, option := range options {
 		option(field)
 	}
-	if field.registerFun == nil {
+	if field.registerFun == nil && field.customRegisFunc == nil {
 		panic("registerFun is nil")
 	}
 	if field.tag == "" {
 		panic("tag is empty")
 	}
-	if field.translation == "" {
+	if field.translation == "" && field.customTransFunc == nil {
 		panic("translation is empty")
 	}
 	return field
