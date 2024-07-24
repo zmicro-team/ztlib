@@ -15,7 +15,7 @@ if success == 1 then
     return 2 -- 超过失败最大次数限制
 end
 
-local current = redis.call("INCRBY", key, 1)
+local current = redis.call("INCRBY", key, 1) -- key val + 1
 if current == 1 then 
     redis.call("EXPIRE", key, window)
 end 

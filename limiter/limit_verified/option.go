@@ -71,6 +71,7 @@ type CodeParam struct {
 	Kind                     string // optional, 默认为: DefaultKind
 	Target                   string // required
 	Code                     string // required
+	TemplateCode             string // required
 	codeMaxErrorQuota        int    // 验证码最大验证失败次数, 默认: 3
 	codeAvailWindowSecond    int    // 验证码有效窗口时间, 默认180, 单位: 秒
 	codeResendIntervalSecond int    // 验证码重发间隔时间, 默认60, 单位: 秒
