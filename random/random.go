@@ -1,4 +1,4 @@
-package stringx
+package random
 
 import (
 	crand "crypto/rand"
