@@ -43,9 +43,10 @@ func (s *Limit) SendCode(ctx context.Context, c *CodeParam, opts ...CodeParamOpt
 	return s.limit.SendCode(
 		ctx,
 		limit_verified.CodeParam{
-			Kind:   c.Kind,
-			Target: c.Target,
-			Code:   c.Code,
+			Kind:         c.Kind,
+			Target:       c.Target,
+			TemplateCode: c.TemplateCode,
+			Code:         c.Code,
 		},
 		opts...,
 	)

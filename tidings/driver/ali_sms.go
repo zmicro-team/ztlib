@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"fmt"
 
 	dySmsApi "github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 	"github.com/zmicro-team/ztlib/limiter/limit_verified"
@@ -35,7 +36,7 @@ func (sf *SmsAliYun) SendCode(c limit_verified.CodeParam) error {
 		Mobile:        c.Target,
 		SignName:      sf.signName,
 		TemplateCode:  c.TemplateCode,
-		TemplateParam: c.Code,
+		TemplateParam: fmt.Sprintf(`{"code":"%s"}`, c.Code),
 	})
 }
 
