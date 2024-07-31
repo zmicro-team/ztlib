@@ -17,11 +17,11 @@ import (
 const UserAuthorizeInfo = "userAuthorizeInfo"
 
 type UserAuthorize struct {
-	publicKey    jwk.Key
-	privateKey   jwk.Key
-	secretKey    jwk.Key
-	options      *AuthorizeConfig
-	banAnAccount func(ctx context.Context, userId string) bool // 本账户是否已经停用
+	publicKey  jwk.Key
+	privateKey jwk.Key
+	secretKey  jwk.Key
+	options    *AuthorizeConfig
+	banAccount func(context.Context, IAuthorizeOther) bool // 是否已经停用
 }
 
 func NewUserAuthorize(options *AuthorizeConfig) *UserAuthorize {
@@ -73,13 +73,13 @@ func NewUserAuthorize(options *AuthorizeConfig) *UserAuthorize {
 	return userAuthorize
 }
 
-// SetBanAnAccount
-func (userAuthorize *UserAuthorize) SetBanAnAccount(banAnAccount func(ctx context.Context, userId string) bool) {
-	userAuthorize.banAnAccount = banAnAccount
+// SetBanAccount
+func (userAuthorize *UserAuthorize) SetBanAccount(callback func(context.Context, IAuthorizeOther) bool) {
+	userAuthorize.banAccount = callback
 }
 
-func (userAuthorize *UserAuthorize) GenerateToken(ctx context.Context, user *UserAuthorizeOther) (str string, err error) {
-	userEncrypt, err := user.Encrypt(userAuthorize.options.KeySignatureAlgorithm, userAuthorize.privateKey)
+func (userAuthorize *UserAuthorize) GenerateToken(ctx context.Context, user IAuthorizeOther) (str string, err error) {
+	userEncrypt, err := user.Encrypt(ctx, userAuthorize.options.KeySignatureAlgorithm, userAuthorize.privateKey)
 	if err != nil {
 		return "", err
 	}
@@ -100,24 +100,24 @@ func (userAuthorize *UserAuthorize) GenerateToken(ctx context.Context, user *Use
 	return string(signed), nil
 }
 
-func (userAuthorize *UserAuthorize) VerifyToken(ctx context.Context, token string) (jwt.Token, *UserAuthorizeOther, error) {
+func (userAuthorize *UserAuthorize) VerifyToken(ctx context.Context, token string, user IAuthorizeOther) (jwt.Token, error) {
 	jwtToken, err := jwt.ParseString(token, jwt.WithKey(userAuthorize.options.SignatureAlgorithm, userAuthorize.secretKey))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	claims := jwtToken.PrivateClaims()
 	userEncrypt, ok := claims[UserAuthorizeInfo]
 	if !ok {
-		return nil, nil, err
+		return nil, err
 	}
-	user, err := new(UserAuthorizeOther).Decrypt(userEncrypt.(string), userAuthorize.options.KeySignatureAlgorithm, userAuthorize.privateKey)
+	err = user.Decrypt(ctx, userEncrypt.(string), userAuthorize.options.KeySignatureAlgorithm, userAuthorize.privateKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	if userAuthorize.banAnAccount != nil {
-		user.Ban = userAuthorize.banAnAccount(ctx, user.Id)
+	if userAuthorize.banAccount != nil {
+		user.SetBan(ctx, userAuthorize.banAccount(ctx, user))
 	}
-	return jwtToken, user, nil
+	return jwtToken, nil
 }
 
 type UserAuthorizeOther struct {
@@ -129,7 +129,7 @@ type UserAuthorizeOther struct {
 
 var _defUserAuthorizeOther = &UserAuthorizeOther{}
 
-func (ua *UserAuthorizeOther) Encrypt(algorithm jwa.KeyEncryptionAlgorithm, jwkRSAPublicKey jwk.Key) (string, error) {
+func (ua *UserAuthorizeOther) Encrypt(ctx context.Context, algorithm jwa.KeyEncryptionAlgorithm, jwkRSAPublicKey jwk.Key) (string, error) {
 	payload, err := json.Marshal(ua)
 	if err != nil {
 		return "", err
@@ -142,22 +142,44 @@ func (ua *UserAuthorizeOther) Encrypt(algorithm jwa.KeyEncryptionAlgorithm, jwkR
 
 }
 
-func (ua *UserAuthorizeOther) Decrypt(encrypted string, algorithm jwa.KeyEncryptionAlgorithm, jwkRSAPrivateKey jwk.Key) (*UserAuthorizeOther, error) {
-
+func (ua *UserAuthorizeOther) Decrypt(ctx context.Context, encrypted string, algorithm jwa.KeyEncryptionAlgorithm, jwkRSAPrivateKey jwk.Key) error {
 	decrypted, err := jwe.Decrypt([]byte(encrypted), jwe.WithKey(algorithm, jwkRSAPrivateKey))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	userAuthorizeOther := &UserAuthorizeOther{}
-	err = json.Unmarshal(decrypted, userAuthorizeOther)
+	err = json.Unmarshal(decrypted, &ua)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return userAuthorizeOther, nil
+	return nil
 }
 
-func (ua *UserAuthorizeOther) SetUserAuthorizeContext(ctx context.Context) context.Context {
+func (ua *UserAuthorizeOther) SetBan(ctx context.Context, b bool) {
+	ua.Ban = b
+}
+
+func (ua *UserAuthorizeOther) GetBan(ctx context.Context) bool {
+	return ua.Ban
+}
+
+func (ua *UserAuthorizeOther) GetId(ctx context.Context) string {
+	return ua.Id
+}
+
+func (ua *UserAuthorizeOther) WithContextValue(ctx context.Context) context.Context {
 	return context.WithValue(ctx, _defUserAuthorizeOther, ua)
+}
+
+func (ua *UserAuthorizeOther) GetFromContext(ctx context.Context) *UserAuthorizeOther {
+	if ctx == nil {
+		return nil
+	}
+	if rv := ctx.Value(_defUserAuthorizeOther); rv != nil {
+		if v, ok := rv.(*UserAuthorizeOther); ok {
+			return v
+		}
+	}
+	return nil
 }
 
 func UserAuthorizeFromContext(ctx context.Context) *UserAuthorizeOther {

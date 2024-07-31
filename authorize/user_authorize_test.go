@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/stretchr/testify/assert"
 )
 
 var testDefaultConfig = AuthorizeConfig{
@@ -35,15 +36,11 @@ func TestGenerateToken(t *testing.T) {
 		Type: "user",
 		Name: "John Doe",
 	}
-	token, err := userAuthorize.GenerateToken(context.Background(),user)
-	if err != nil {
-		t.Errorf("Error generating token: %v", err)
-	}
-	if token == "" {
-		t.Errorf("Expected non-empty token, got empty")
-	}
+	token, err := userAuthorize.GenerateToken(context.Background(), user)
+	assert.NoError(t, err)
+	assert.NotEqual(t, token, "")
 }
-func TestVerifyToken(t *testing.T) {
+func TestVerifyTokenExpire(t *testing.T) {
 	options := &testDefaultConfig
 	options.Expire = time.Second
 	userAuthorize := NewUserAuthorize(options)
@@ -60,14 +57,29 @@ func TestVerifyToken(t *testing.T) {
 		t.Errorf("Expected non-empty token, got empty")
 	}
 	time.Sleep(time.Second * 2)
-	tok, getUser, err := userAuthorize.VerifyToken(context.Background(), token)
+	getUser := new(UserAuthorizeOther)
+	tok, err := userAuthorize.VerifyToken(context.Background(), token, getUser)
+	assert.NotNil(t, err)
+	assert.Nil(t, tok)
+	assert.Empty(t, getUser.Id)
+}
+
+func TestVerifyTokenNotExpire(t *testing.T) {
+	options := &testDefaultConfig
+	options.Expire = time.Second * 10
+	userAuthorize := NewUserAuthorize(options)
+	user := &UserAuthorizeOther{
+		Id:   "123",
+		Type: "user",
+		Name: "John Doe",
+	}
+	token, err := userAuthorize.GenerateToken(context.Background(), user)
 	if err != nil {
-		t.Errorf("Error verifying token: %v", err)
+		t.Errorf("Error generating token: %v", err)
 	}
-	if tok == nil {
-		t.Errorf("Expected non-nil token, got nil")
-	}
-	if getUser == nil {
-		t.Errorf("Expected non-nil user, got nil")
-	}
+	getUser := new(UserAuthorizeOther)
+	tok, err := userAuthorize.VerifyToken(context.Background(), token, getUser)
+	assert.NoError(t, err)
+	assert.NotNil(t, tok)
+	assert.NotNil(t, getUser)
 }

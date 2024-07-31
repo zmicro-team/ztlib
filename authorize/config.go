@@ -9,10 +9,10 @@ import (
 type AuthorizeConfig struct {
 	Expire                time.Duration
 	Issuer                string
-	KeySignatureAlgorithm jwa.KeyEncryptionAlgorithm
-	PrivateKeyPath        string
+	SecretKey             string // 密钥
 	PublicKeyPath         string
 	RefreshTimeout        time.Duration
-	SecretKey             string
-	SignatureAlgorithm    jwa.SignatureAlgorithm
+	PrivateKeyPath        string
+	SignatureAlgorithm    jwa.SignatureAlgorithm     // 签名算法
+	KeySignatureAlgorithm jwa.KeyEncryptionAlgorithm // 密钥签名算法
 }
