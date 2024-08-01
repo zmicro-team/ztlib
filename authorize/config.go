@@ -14,5 +14,5 @@ type AuthorizeConfig struct {
 	RefreshTimeout        time.Duration
 	PrivateKeyPath        string
 	SignatureAlgorithm    jwa.SignatureAlgorithm     // 签名算法
-	KeySignatureAlgorithm jwa.KeyEncryptionAlgorithm // 密钥签名算法
+	KeySignatureAlgorithm jwa.KeyEncryptionAlgorithm // 键密钥签名算法
 }
