@@ -1,6 +1,8 @@
 module github.com/zmicro-team/ztlib
 
-go 1.22.5
+go 1.22
+
+toolchain go1.22.5
 
 require (
 	github.com/alicebob/miniredis/v2 v2.32.1
