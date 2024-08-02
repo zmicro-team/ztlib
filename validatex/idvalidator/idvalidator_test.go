@@ -54,6 +54,7 @@ func TestIsValid(t *testing.T) {
 		"340101200907090240",
 		"340101200907090267",
 		"340101200907090283",
+		"350424198402290530",
 	}
 
 	invaildData := []string{
@@ -71,6 +72,7 @@ func TestIsValid(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		assert.True(t, IsValid(vaildData[i]))
+		assert.True(t, IsValid(vaildData[i]))
 		assert.False(t, IsValid(invaildData[i]))
 		assert.True(t, IsValidCitizenNo(vaildData[i]))
 		assert.False(t, IsValidCitizenNo(invaildData[i]))
@@ -81,5 +83,57 @@ func TestIsValid(t *testing.T) {
 func BenchmarkIsValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = IsValid("340101200907090283")
+	}
+}
+
+func TestCheckBirthdayValid(t *testing.T) {
+	type args struct {
+		nYear  int
+		nMonth int
+		nDay   int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "1984-2-29",
+			args: args{nYear: 1984, nMonth: 2, nDay: 29},
+			want: true,
+		},
+		{
+			name: "2000-2-29",
+			args: args{nYear: 1984, nMonth: 2, nDay: 29},
+			want: true,
+		},
+		{
+			name: "1985-2-29",
+			args: args{nYear: 1985, nMonth: 2, nDay: 29},
+			want: false,
+		},
+		{
+			name: "2001-2-29",
+			args: args{nYear: 2001, nMonth: 2, nDay: 29},
+			want: false,
+		},
+		{
+			name: "1985-2-28",
+			args: args{nYear: 1985, nMonth: 2, nDay: 28},
+			want: true,
+		},
+		{
+			name: "2001-2-28",
+			args: args{nYear: 2001, nMonth: 2, nDay: 28},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CheckBirthdayValid(tt.args.nYear, tt.args.nMonth, tt.args.nDay); got != tt.want {
+				t.Errorf("CheckBirthdayValid() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
