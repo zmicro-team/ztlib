@@ -77,7 +77,6 @@ func TestIsValid(t *testing.T) {
 		assert.True(t, IsValidCitizenNo(vaildData[i]))
 		assert.False(t, IsValidCitizenNo(invaildData[i]))
 	}
-
 }
 
 func BenchmarkIsValid(b *testing.B) {

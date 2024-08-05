@@ -11,9 +11,11 @@ import (
 )
 
 // 是否为手机
-var rxMobile = regexp.MustCompile("^1[3456789]\\d{9}$")
-//  是否为ISO8601时间格式
+var rxMobile = regexp.MustCompile(`^1[3456789]\d{9}$`)
+
+// 是否为ISO8601时间格式
 var iso8601 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:?\d{2}|Z)$`)
+
 // \b[A-Z]\d{6}[\(][(A-Z0-9][\)]
 // OR
 // \b[A-Z][A-Z]\d{6}\(\d\)
@@ -37,7 +39,7 @@ func ValidateIsIDCard(fl validator.FieldLevel) bool {
 	return false
 }
 
-//  是否为ISO8601时间格式
+// 是否为ISO8601时间格式
 func ValidateIsISO8601(fl validator.FieldLevel) bool {
 	return iso8601.MatchString(fl.Field().String())
 }

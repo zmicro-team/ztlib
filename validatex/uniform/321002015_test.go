@@ -67,7 +67,7 @@ func TestCalculateCheckCodex(t *testing.T) {
 			t.Logf("char %s is not in codeOrigin: %s", string(char), code)
 			return
 		}
-		weight := weightedfactors[i]
+		weight := weightedFactors[i]
 		sum += index * weight
 	}
 	remainder := sum % 31
@@ -79,5 +79,3 @@ func TestCalculateCheckCodex(t *testing.T) {
 	}
 	assert.NotEqual(t, code[17:], string(codeOrigin[checkCode]))
 }
-
-

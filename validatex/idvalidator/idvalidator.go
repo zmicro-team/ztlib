@@ -58,11 +58,7 @@ func IsValid(citizenNo string) bool {
 		nSum += n * weight[i]
 	}
 	mod := nSum % 11
-	if validValue[mod] == citizenNo[17] {
-		return true
-	}
-
-	return false
+	return validValue[mod] == citizenNo[17]
 }
 
 func isLeapYear(nYear int) bool {
@@ -125,7 +121,6 @@ func CheckProvinceValid(citizenNo string) bool {
 }
 
 func IsValidCitizenNo(citizenNo string) bool {
-
 	if !IsValid(citizenNo) {
 		return false
 	}
@@ -150,11 +145,7 @@ func IsValidCitizenNo(citizenNo string) bool {
 	nYear, _ := strconv.Atoi(citizenNo[6:10])
 	nMonth, _ := strconv.Atoi(citizenNo[10:12])
 	nDay, _ := strconv.Atoi(citizenNo[12:14])
-	if !CheckBirthdayValid(nYear, nMonth, nDay) {
-		return false
-	}
-
-	return true
+	return CheckBirthdayValid(nYear, nMonth, nDay)
 }
 
 func GetCitizenNoInfo(citizenNo string) (birthday time.Time, sex string, address string, err error) {

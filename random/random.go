@@ -10,11 +10,11 @@ import (
 
 const (
 	defaultLetterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	letterIdxBits     = 6 // 6 bits to represent a letter index
-	idLen             = 8
-	defaultRandLen    = 8
-	letterIdxMask     = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax      = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+	defaultRandLen     = 8
+	idLen              = 8
+	letterIdxBits      = 6                    // 6 bits to represent a letter index
+	letterIdxMask      = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax       = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
 
 var src = newLockedSource(time.Now().UnixNano())
@@ -44,7 +44,7 @@ func (ls *lockedSource) Seed(seed int64) {
 
 // Rand returns a random string.
 func Rand() string {
-	return Randn(defaultRandLen,"")
+	return Randn(defaultRandLen, "")
 }
 
 // RandId returns a random id string.

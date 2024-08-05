@@ -8,6 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testHeaderExtractorType string
+
+// nolint
 func TestExtractors(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "Authorization", "Bearer abc123")
 	ctx = context.WithValue(ctx, "Token", "abc123")
@@ -59,10 +62,14 @@ func TestExtractors(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, "abc123", token)
 }
+
+// nolint
 func TestHeaderExtractor_Extract(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "Authorization", "abc123")
-	ctx = context.WithValue(ctx, "token", "321abc")
-	extractor := HeaderExtractor{"Authorization", "Token"}
+	var authorizationStr testHeaderExtractorType = "Authorization"
+	ctx := context.WithValue(context.Background(), string(authorizationStr), "abc123")
+	var tokenStr testHeaderExtractorType = "token"
+	ctx = context.WithValue(ctx, tokenStr, "321abc")
+	extractor := HeaderExtractor{string(authorizationStr), string(tokenStr)}
 
 	token, err := extractor.Extract(ctx)
 
@@ -70,8 +77,10 @@ func TestHeaderExtractor_Extract(t *testing.T) {
 	assert.Equal(t, "abc123", token)
 }
 
+// nolint
 func TestBearerExtractor_Extract(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "Authorization", "Bearer abc123")
+	var authorizationStr testHeaderExtractorType = "Authorization"
+	ctx := context.WithValue(context.Background(), string(authorizationStr), "Bearer abc123")
 	extractor := BearerExtractor{}
 
 	token, err := extractor.Extract(ctx)
@@ -80,8 +89,10 @@ func TestBearerExtractor_Extract(t *testing.T) {
 	assert.Equal(t, "abc123", token)
 }
 
+// nolint
 func TestAuthorizationExtractor_Extract(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "Authorization", "Bearer abc123")
+	var authorizationStr testHeaderExtractorType = "Authorization"
+	ctx := context.WithValue(context.Background(), string(authorizationStr), "Bearer abc123")
 	extractor := AuthorizationExtractor{}
 
 	token, err := extractor.Extract(ctx)
@@ -90,8 +101,10 @@ func TestAuthorizationExtractor_Extract(t *testing.T) {
 	assert.Equal(t, "Bearer abc123", token)
 }
 
+// nolint
 func TestTokenExtractor_Extract(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "Token", "abc123")
+	var tokenStr testHeaderExtractorType = "Token"
+	ctx := context.WithValue(context.Background(), string(tokenStr), "abc123")
 	extractor := TokenExtractor{}
 
 	token, err := extractor.Extract(ctx)

@@ -139,7 +139,6 @@ func (ua *UserAuthorizeOther) Encrypt(ctx context.Context, algorithm jwa.KeyEncr
 		return "", err
 	}
 	return string(encrypted), nil
-
 }
 
 func (ua *UserAuthorizeOther) Decrypt(ctx context.Context, encrypted string, algorithm jwa.KeyEncryptionAlgorithm, jwkRSAPrivateKey jwk.Key) error {

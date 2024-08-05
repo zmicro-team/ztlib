@@ -17,6 +17,7 @@ func RegisterDefaultValidators(v *validator.Validate, trans ut.Translator) error
 //   - validators: 字段验证器的列表，实现了 IFieldValidator 接口。
 //   - v: validator.Validate 实例，用于注册验证器。
 //   - trans: ut.Translator 实例，用于注册翻译器。
+//
 // 返回值：
 //   - err: 错误信息，如果注册过程中发生错误，则返回相应的错误。
 func Register(validators []IFieldValidator, v *validator.Validate, trans ut.Translator) (err error) {
@@ -44,32 +45,21 @@ func Register(validators []IFieldValidator, v *validator.Validate, trans ut.Tran
 
 	// * register translation
 	if trans != nil {
-
 		for _, t := range validators {
-
 			if t.CustomTransFunc() != nil && t.CustomRegisFunc() != nil {
-
 				err = v.RegisterTranslation(t.Tag(), trans, t.CustomRegisFunc(), t.CustomTransFunc())
-
 			} else if t.CustomTransFunc() != nil && t.CustomRegisFunc() == nil {
-
 				err = v.RegisterTranslation(t.Tag(), trans, registrationFunc(t.Tag(), t.Translation(), t.Override()), t.CustomTransFunc())
-
 			} else if t.CustomTransFunc() == nil && t.CustomRegisFunc() != nil {
-
 				err = v.RegisterTranslation(t.Tag(), trans, t.CustomRegisFunc(), translateFunc)
-
 			} else {
 				err = v.RegisterTranslation(t.Tag(), trans, registrationFunc(t.Tag(), t.Translation(), t.Override()), translateFunc)
 			}
-
 			if err != nil {
 				return
 			}
 		}
-
 	}
-
 	return
 }
 

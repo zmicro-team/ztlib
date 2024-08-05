@@ -41,7 +41,8 @@ func (t TranslateError) Translate(err error) error {
 		return err
 	}
 	detail := []string{}
-	for k, _ := range errs {
+	for k, x := range errs {
+		_ = x
 		item := errs[k]
 		detail = append(detail, item.Translate(defaultZhTrans))
 	}

@@ -75,6 +75,7 @@ func newAuthorizationHeader1(s string) http.Header {
 
 // `(request-target)`, `(created)`, `(expires)`
 // invalid created value
+//nolint
 func newAuthorizationHeader1InvalidCreated(s string) http.Header {
 	return http.Header{
 		HeaderAuthorization: []string{s},
@@ -85,6 +86,7 @@ func newAuthorizationHeader1InvalidCreated(s string) http.Header {
 
 // `(request-target)`, `(created)`, `(expires)`
 // invalid expires value
+//nolint
 func newAuthorizationHeader1InvalidExpires(s string) http.Header {
 	return http.Header{
 		HeaderAuthorization: []string{s},
@@ -95,6 +97,7 @@ func newAuthorizationHeader1InvalidExpires(s string) http.Header {
 }
 
 // `(request-target)`, `(date)`
+//nolint
 func newAuthorizationHeader2(s string) http.Header {
 	return http.Header{
 		HeaderAuthorization: []string{s},
