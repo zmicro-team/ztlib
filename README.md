@@ -7,4 +7,6 @@
 
 ```sh
 go test -tags='!ignore' ./...
+
+golangci-lint run --disable-all -E goimports,misspell,whitespace
 ```
