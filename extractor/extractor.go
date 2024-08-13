@@ -13,6 +13,7 @@ var ErrInvalidTokenType = errors.New("invalid token type")
 type Extractor interface {
 	Extract(ctx context.Context) (string, error)
 	ExtractRequest(http *http.Request) (string, error)
+	ExtractHeader(header http.Header) (string, error)
 }
 
 type HeaderExtractor []string
@@ -38,68 +39,102 @@ func (h HeaderExtractor) ExtractRequest(r *http.Request) (string, error) {
 	return "", ErrNoTokenInContext
 }
 
+func (h HeaderExtractor) ExtractHeader(httpHeader http.Header) (string, error) {
+	for _, header := range h {
+		token := httpHeader.Get(header)
+		if token != "" {
+			return token, nil
+		}
+	}
+	return "", ErrNoTokenInContext
+}
+
 type BearerExtractor struct{}
 
 func (e BearerExtractor) Extract(ctx context.Context) (string, error) {
 	token := ctx.Value("Authorization")
-	token_header, ok := token.(string)
+	tokenHeader, ok := token.(string)
 	if !ok {
 		return "", ErrInvalidTokenType
 	}
-	if token_header == "" || !strings.HasPrefix(strings.ToLower(token_header), "bearer ") {
+	if tokenHeader == "" || !strings.HasPrefix(strings.ToLower(tokenHeader), "bearer ") {
 		return "", ErrNoTokenInContext
 	}
-	return token_header[7:], nil
+	return tokenHeader[7:], nil
 }
 
 func (e BearerExtractor) ExtractRequest(r *http.Request) (string, error) {
-	token_header := r.Header.Get("Authorization")
-	if token_header == "" || !strings.HasPrefix(strings.ToLower(token_header), "bearer ") {
+	tokenHeader := r.Header.Get("Authorization")
+	if tokenHeader == "" || !strings.HasPrefix(strings.ToLower(tokenHeader), "bearer ") {
 		return "", ErrNoTokenInContext
 	}
-	return token_header[7:], nil
+	return tokenHeader[7:], nil
+}
+
+func (e BearerExtractor) ExtractHeader(header http.Header) (string, error) {
+	tokenHeader := header.Get("Authorization")
+	if tokenHeader == "" || !strings.HasPrefix(strings.ToLower(tokenHeader), "bearer ") {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader[7:], nil
 }
 
 type AuthorizationExtractor struct{}
 
 func (e AuthorizationExtractor) Extract(ctx context.Context) (string, error) {
 	token := ctx.Value("Authorization")
-	token_header, ok := token.(string)
+	tokenHeader, ok := token.(string)
 	if !ok {
 		return "", ErrInvalidTokenType
 	}
-	if token_header == "" {
+	if tokenHeader == "" {
 		return "", ErrNoTokenInContext
 	}
-	return token_header, nil
+	return tokenHeader, nil
 }
 
 func (e AuthorizationExtractor) ExtractRequest(r *http.Request) (string, error) {
-	token_header := r.Header.Get("Authorization")
-	if token_header == "" {
+	tokenHeader := r.Header.Get("Authorization")
+	if tokenHeader == "" {
 		return "", ErrNoTokenInContext
 	}
-	return token_header, nil
+	return tokenHeader, nil
+}
+
+func (e AuthorizationExtractor) ExtractHeader(header http.Header) (string, error) {
+	tokenHeader := header.Get("Authorization")
+	if tokenHeader == "" {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader, nil
 }
 
 type TokenExtractor struct{}
 
 func (e TokenExtractor) Extract(ctx context.Context) (string, error) {
 	token := ctx.Value("Token")
-	token_header, ok := token.(string)
+	tokenHeader, ok := token.(string)
 	if !ok {
 		return "", ErrInvalidTokenType
 	}
-	if token_header == "" {
+	if tokenHeader == "" {
 		return "", ErrNoTokenInContext
 	}
-	return token_header, nil
+	return tokenHeader, nil
 }
 
 func (e TokenExtractor) ExtractRequest(r *http.Request) (string, error) {
-	token_header := r.Header.Get("Token")
-	if token_header == "" {
+	tokenHeader := r.Header.Get("Token")
+	if tokenHeader == "" {
 		return "", ErrNoTokenInContext
 	}
-	return token_header, nil
+	return tokenHeader, nil
+}
+
+func (e TokenExtractor) ExtractHeader(header http.Header) (string, error) {
+	tokenHeader := header.Get("Token")
+	if tokenHeader == "" {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader, nil
 }

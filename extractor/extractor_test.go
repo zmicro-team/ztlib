@@ -112,3 +112,48 @@ func TestTokenExtractor_Extract(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "abc123", token)
 }
+
+// Test HeaderExtractor ExtractHeader
+func TestHeaderExtractor_ExtractHeader(t *testing.T) {
+	headerExtractor := HeaderExtractor{"Token", "Authorization"}
+	httpHeader := http.Header{
+		"Authorization": []string{"Bearer xyz456"},
+		"Token":         []string{"abc123"},
+	}
+	token, err := headerExtractor.ExtractHeader(httpHeader)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, "abc123", token)
+}
+
+// Test BearerExtractor ExtractHeader
+func TestBearerExtractor_ExtractHeader(t *testing.T) {
+	bearerExtractor := BearerExtractor{}
+	httpHeader := http.Header{
+		"Authorization": []string{"Bearer xyz456"},
+	}
+	token, err := bearerExtractor.ExtractHeader(httpHeader)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, "xyz456", token)
+}
+
+// Test AuthorizationExtractor ExtractHeader
+func TestAuthorizationExtractor_ExtractHeader(t *testing.T) {
+	authorizationExtractor := AuthorizationExtractor{}
+	httpHeader := http.Header{
+		"Authorization": []string{"Bearer xyz456"},
+	}
+	token, err := authorizationExtractor.ExtractHeader(httpHeader)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, "Bearer xyz456", token)
+}
+
+// Test TokenExtractor ExtractHeader
+func TestTokenExtractor_ExtractHeader(t *testing.T) {
+	tokenExtractor := TokenExtractor{}
+	httpHeader := http.Header{
+		"Token": []string{"abc123"},
+	}
+	token, err := tokenExtractor.ExtractHeader(httpHeader)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, "abc123", token)
+}
