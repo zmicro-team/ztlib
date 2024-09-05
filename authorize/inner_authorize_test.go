@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/r3labs/diff/v3"
 )
 
@@ -96,7 +97,8 @@ func TestInnerAuthorize_GenerateToken(t *testing.T) {
 		{
 			name: "TestInner1",
 			innerAuthorize: NewInnerAuthorize(&InnerAuthorizeConfig{
-				Secret: "*&@^!&#$*$@#*!(SD~AD><?)",
+				Secret:                "*&@^!&#$*$@#*!(SD~AD><?)",
+				KeySignatureAlgorithm: jwa.A256KW,
 			}),
 			args: args{
 				ctx: context.Background(),
@@ -115,7 +117,8 @@ func TestInnerAuthorize_GenerateToken(t *testing.T) {
 		{
 			name: "TestInner2",
 			innerAuthorize: NewInnerAuthorize(&InnerAuthorizeConfig{
-				Secret: "*&@^!&#$*$@#*!(SD~AD><?)",
+				Secret:                "*&@^!&#$*$@#*!(SD~AD><?)",
+				KeySignatureAlgorithm: jwa.A256GCMKW,
 			}),
 			args: args{
 				ctx: context.Background(),
@@ -175,11 +178,12 @@ func TestInnerAuthorize_VerifyToken(t *testing.T) {
 		{
 			name: "TestInner1",
 			innerAuthorize: NewInnerAuthorize(&InnerAuthorizeConfig{
-				Secret: "*&@^!&#$*$@#*!(SD~AD><?)",
+				Secret:                "*&@^!&#$*$@#*!(SD~AD><?)",
+				KeySignatureAlgorithm: jwa.A256GCMKW,
 			}),
 			args: args{
 				ctx:   context.Background(),
-				token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbm5lckF1dGhvcml6ZUluZm8iOiJleUpoYkdjaU9pSkJNVEk0UzFjaUxDSmxibU1pT2lKQk1qVTJSME5OSW4wLmJ1azVmOTVYTjVJQjV6VnZBdk03YzVhTDhlNThmQkJYUk1VYjhOblo3ajZCamZMZ2hBRXVFQS5MVUVlMlctZmZTNlpZN0ZoLl9OQkNLcFgxcFFlYjJEekNvS3BGd0RwdTJrVW50aElSdDJXcHpyaG45SVRrZGdHdW5YSVE1dFRXN1djdjFmeEc0cnBzbzNBR2NXc2owWTFKUmlac2FNMVZEM0loX1EuSmxqYkRacWlYNVM2QlNFRU5PTE5yUSIsImlzcyI6ImlubmVyQXV0aG9yaXplSW5mbyJ9.hjr6EzljLJvnSLb1HjWMZ7rQufjHn4gE8GJGwcnXT8g",
+				token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbm5lckF1dGhvcml6ZUluZm8iOiJleUpoYkdjaU9pSkJNalUyUjBOTlMxY2lMQ0psYm1NaU9pSkJNalUyUjBOTklpd2lhWFlpT2lKSVVFOUphblp2VEVkWmJIcGxjMFIzSWl3aWRHRm5Jam9pYTJ0cVJYbFhhbEp5VERCUWVGOW9PWGxtYVVOdWR5SjkubjZIRGJWdmoyOVl3QmIxU2x2X2pnZEF4M1FfSHZUM2NydGtSMkFJd09STS5XSnBuSEh0NTFUZUo3OWhRLnRzbUJzb294NTBNc0l4QU5yNk1nWjJDVWZUNzdzWmxHc2NfWU9QUUQ4aGdMampxck5zeTFQZExkTWVTZjFsTU9jYXJTLWpBMDRyNFZGTUJMTDFGZlp6OWp4VXVqRXcuYVhHb1l6cmFYNzJnbTFoWFNjel85dyIsImlzcyI6ImlubmVyQXV0aG9yaXplSW5mbyJ9.yqfBZkKUcnv2HWhqAR6HRSCSxXph7h-dOwGJEQkKVPw",
 				user:  &UserAuthorizeOther{},
 			},
 			want: &UserAuthorizeOther{
@@ -196,7 +200,7 @@ func TestInnerAuthorize_VerifyToken(t *testing.T) {
 				t.Errorf("InnerAuthorize.VerifyToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			// t.Logf("tt.args.user %v", tt.args.user)
+			t.Logf("tt.args.user %v", tt.args.user)
 			// return
 			c, err := diff.Diff(tt.args.user, tt.want)
 			if err != nil {
