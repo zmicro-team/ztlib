@@ -4,16 +4,23 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 var ErrNoTokenInContext = errors.New("no token present in context")
 var ErrInvalidTokenType = errors.New("invalid token type")
 
+var _ Extractor = (*HeaderExtractor)(nil)
+var _ Extractor = (*BearerExtractor)(nil)
+var _ Extractor = (*AuthorizationExtractor)(nil)
+var _ Extractor = (*TokenExtractor)(nil)
+
 type Extractor interface {
 	Extract(ctx context.Context) (string, error)
 	ExtractRequest(http *http.Request) (string, error)
 	ExtractHeader(header http.Header) (string, error)
+	ExtractQuery(query url.Values) (string, error)
 }
 
 type HeaderExtractor []string
@@ -42,6 +49,16 @@ func (h HeaderExtractor) ExtractRequest(r *http.Request) (string, error) {
 func (h HeaderExtractor) ExtractHeader(httpHeader http.Header) (string, error) {
 	for _, header := range h {
 		token := httpHeader.Get(header)
+		if token != "" {
+			return token, nil
+		}
+	}
+	return "", ErrNoTokenInContext
+}
+
+func (h HeaderExtractor) ExtractQuery(query url.Values) (string, error) {
+	for _, header := range h {
+		token := query.Get(header)
 		if token != "" {
 			return token, nil
 		}
@@ -79,6 +96,14 @@ func (e BearerExtractor) ExtractHeader(header http.Header) (string, error) {
 	return tokenHeader[7:], nil
 }
 
+func (e BearerExtractor) ExtractQuery(query url.Values) (string, error) {
+	tokenHeader := query.Get("Authorization")
+	if tokenHeader == "" || !strings.HasPrefix(strings.ToLower(tokenHeader), "bearer ") {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader[7:], nil
+}
+
 type AuthorizationExtractor struct{}
 
 func (e AuthorizationExtractor) Extract(ctx context.Context) (string, error) {
@@ -109,6 +134,14 @@ func (e AuthorizationExtractor) ExtractHeader(header http.Header) (string, error
 	return tokenHeader, nil
 }
 
+func (e AuthorizationExtractor) ExtractQuery(query url.Values) (string, error) {
+	tokenHeader := query.Get("Authorization")
+	if tokenHeader == "" {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader, nil
+}
+
 type TokenExtractor struct{}
 
 func (e TokenExtractor) Extract(ctx context.Context) (string, error) {
@@ -133,6 +166,14 @@ func (e TokenExtractor) ExtractRequest(r *http.Request) (string, error) {
 
 func (e TokenExtractor) ExtractHeader(header http.Header) (string, error) {
 	tokenHeader := header.Get("Token")
+	if tokenHeader == "" {
+		return "", ErrNoTokenInContext
+	}
+	return tokenHeader, nil
+}
+
+func (e TokenExtractor) ExtractQuery(query url.Values) (string, error) {
+	tokenHeader := query.Get("Token")
 	if tokenHeader == "" {
 		return "", ErrNoTokenInContext
 	}
