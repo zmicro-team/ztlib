@@ -79,3 +79,33 @@ func TestCalculateCheckCodex(t *testing.T) {
 	}
 	assert.NotEqual(t, code[17:], string(codeOrigin[checkCode]))
 }
+
+func TestUniform321002015_GetProvinceName(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields string
+		want   string
+	}{
+		// TODO: Add test cases.
+		{
+			name:   "test",
+			fields: "91350100M000100Y43",
+			want:   "福建省",
+		},
+		{
+			name:   "test",
+			fields: "91320118MA21R1P51X",
+			want:   "江苏省",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u, _ := NewUniform321002015(tt.fields)
+			if got := u.GetProvinceName(); got != tt.want {
+				t.Errorf("Uniform321002015.GetProvinceName() = %v, want %v", got, tt.want)
+			} else {
+				t.Logf("Uniform321002015.GetProvinceName() = %v", got)
+			}
+		})
+	}
+}

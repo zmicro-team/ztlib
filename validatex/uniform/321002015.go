@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/zmicro-team/ztlib/validatex/idvalidator"
 )
 
 /*
@@ -103,6 +105,10 @@ func NewUniform321002015(code string) (u *Uniform321002015, err error) {
 		Cc:  code[17:18],
 		Org: code,
 	}, nil
+}
+
+func (u *Uniform321002015) GetProvinceName() string {
+	return idvalidator.GetProvince(u.Ad)
 }
 
 /*
