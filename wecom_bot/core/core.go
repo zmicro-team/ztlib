@@ -10,9 +10,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
-// bot
-
 type Config struct {
+	Name        string
 	Key         string
 	IsEnableLog bool
 }
@@ -24,11 +23,14 @@ type Client struct {
 }
 
 func NewClient(cfg Config) *Client {
+	if cfg.Name == "" {
+		cfg.Name = "wecombot"
+	}
 	c := &Client{
 		http:   resty.New(),
 		config: cfg,
 		log: &defaultLog{
-			AppName: "wecombot",
+			AppName: cfg.Name,
 		},
 	}
 	c.http = c.http.SetBaseURL(consts.BASE_URL)

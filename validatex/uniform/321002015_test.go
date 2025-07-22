@@ -59,7 +59,7 @@ func TestUniform321002015Regex(t *testing.T) {
 }
 
 func TestCalculateCheckCodex(t *testing.T) {
-	code := "91350122MADDCYYE39"
+	code := "91350100M000100Y44"
 	sum := 0
 	for i, char := range code[:17] {
 		index := strings.Index(codeOrigin, string(char))

@@ -10,7 +10,7 @@ import (
 )
 
 func TestUncode(t *testing.T) {
-	assert.True(t, uniform.CalibrationUniform321002015("911201143858628820"))
+	assert.True(t, uniform.CalibrationUniform321002015("91350121MA357Q655U"))
 }
 
 func TestIdCard(t *testing.T) {
