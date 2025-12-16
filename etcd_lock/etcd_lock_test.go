@@ -11,7 +11,8 @@ import (
 
 func setupEtcdClient(t *testing.T) *clientv3.Client {
 	config := clientv3.Config{
-		Endpoints: []string{"172.16.5.7:2379"},
+		// Endpoints: []string{"172.16.5.7:2379"},
+		Endpoints: []string{"etcd.local.uc1024.com"},
 		Username:  "root",
 		Password:  "Wf3DpvKbiZ+R1rZ2",
 		// 设置较短的超时时间用于测试
