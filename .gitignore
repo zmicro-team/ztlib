@@ -18,3 +18,5 @@
 
 wecom_bot/core/*_test.go
 wecom_bot/service/message_send/*_test.go
+
+_test_config*
