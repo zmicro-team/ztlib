@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	pluginmanager "github.com/zmicro-team/ztlib/plugin_manager"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
@@ -47,7 +48,7 @@ type TracerExporter struct {
 	TextMapPropagator    propagation.TextMapPropagator
 	samplingCall         []SamplingCall
 	spanProcessorEndCall []SpanProcessorEndCall
-	pluginManager        *PluginManager
+	pluginManager        *pluginmanager.PluginManager
 }
 
 type SamplingCall func(p sdktrace.SamplingParameters) (*sdktrace.SamplingResult, error)
@@ -230,9 +231,9 @@ func (be *TracerExporter) AddSpanProcessorEndCall(fn SpanProcessorEndCall) {
 }
 
 // 添加插件管理方法
-func (be *TracerExporter) RegisterPlugin(plugin CollectorPlugin) error {
+func (be *TracerExporter) RegisterPlugin(plugin pluginmanager.CollectorPlugin) error {
 	if be.pluginManager == nil {
-		be.pluginManager = NewPluginManager()
+		be.pluginManager = pluginmanager.NewPluginManager()
 	}
 	return be.pluginManager.RegisterPlugin(plugin)
 }
@@ -246,7 +247,7 @@ func (be *TracerExporter) UnregisterPlugin(name string) error {
 
 func (be *TracerExporter) StartPlugins(ctx context.Context) error {
 	if be.pluginManager == nil {
-		be.pluginManager = NewPluginManager()
+		be.pluginManager = pluginmanager.NewPluginManager()
 	}
 	return be.pluginManager.StartAll(ctx)
 }
@@ -265,7 +266,7 @@ func (be *TracerExporter) GetPluginList() []string {
 	return be.pluginManager.GetPlugins()
 }
 
-func (be *TracerExporter) GetPlugin(name string) (CollectorPlugin, bool) {
+func (be *TracerExporter) GetPlugin(name string) (pluginmanager.CollectorPlugin, bool) {
 	if be.pluginManager == nil {
 		return nil, false
 	}

@@ -1,4 +1,4 @@
-package base_exporter
+package pluginmanager
 
 import (
 	"context"
@@ -8,9 +8,9 @@ import (
 )
 
 type CollectorPlugin interface {
-	// 启动插件采集
+	// 启动插件
 	Start(ctx context.Context) error
-	// 停止插件采集
+	// 停止插件
 	Stop(ctx context.Context) error
 	// Events 返回插件的事件
 	Events(ctx context.Context, value any) <-chan any
@@ -154,8 +154,8 @@ func (pm *PluginManager) GetPlugins() []string {
 	return names
 }
 
-// 不安全的获取插件方法，仅用于内部使用
-func (pm *PluginManager) unsafeGetPlugin(name string) (CollectorPlugin,bool) {
+// 不安全的获取插件方法
+func (pm *PluginManager) UnsafeGetPlugin(name string) (CollectorPlugin, bool) {
 	plugin, exists := pm.plugins[name]
 	return plugin, exists
 }

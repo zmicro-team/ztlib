@@ -1,4 +1,4 @@
-package base_exporter
+package pluginmanager
 
 import (
 	"context"
@@ -179,6 +179,11 @@ func TestPluginManager_RegisterPlugin(t *testing.T) {
 			}(),
 			expectError: true,
 			errorMsg:    "failed to start plugin 'fail-start-plugin': start failed",
+		},
+		{
+			name:        "成功注册事件插件",
+			plugin:      NewEventPlugin("test-event-plugin", DefaultEventPluginConfig()),
+			expectError: false,
 		},
 	}
 
@@ -764,32 +769,32 @@ func BenchmarkPluginManager_GetPlugin(b *testing.B) {
 func TestPluginManager_GetSyncEvent(t *testing.T) {
 	pm := NewPluginManager()
 	plugin := NewMockPlugin("sync-test-plugin")
-	
+
 	err := pm.RegisterPlugin(plugin)
 	require.NoError(t, err)
-	
+
 	ctx := context.Background()
 	err = pm.StartAll(ctx)
 	require.NoError(t, err)
 	defer pm.StopAll()
-	
+
 	// 发送一个测试事件
 	testEvent := "test-event-data"
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		plugin.SendEvent(testEvent)
 	}()
-	
+
 	// 测试同步获取事件
 	event, err := pm.GetSyncEvent("sync-test-plugin", "request", time.Second)
 	require.NoError(t, err)
 	assert.Equal(t, testEvent, event)
-	
+
 	// 测试超时情况
 	_, err = pm.GetSyncEvent("sync-test-plugin", "request", 50*time.Millisecond)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "deadline exceeded")
-	
+
 	// 测试不存在的插件
 	_, err = pm.GetSyncEvent("non-existent-plugin", "request", time.Second)
 	assert.Error(t, err)
@@ -801,31 +806,31 @@ func TestPluginManager_GetSyncEvents(t *testing.T) {
 	pm := NewPluginManager()
 	plugin1 := NewMockPlugin("sync-plugin-1")
 	plugin2 := NewMockPlugin("sync-plugin-2")
-	
+
 	err := pm.RegisterPlugin(plugin1)
 	require.NoError(t, err)
 	err = pm.RegisterPlugin(plugin2)
 	require.NoError(t, err)
-	
+
 	ctx := context.Background()
 	err = pm.StartAll(ctx)
 	require.NoError(t, err)
 	defer pm.StopAll()
-	
+
 	// 发送测试事件
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		plugin1.SendEvent("event-1")
 		plugin2.SendEvent("event-2")
 	}()
-	
+
 	// 测试批量同步获取事件
 	results, err := pm.GetSyncEvents([]string{"sync-plugin-1", "sync-plugin-2"}, "request", time.Second)
 	require.NoError(t, err)
 	assert.Len(t, results, 2)
 	assert.Equal(t, "event-1", results["sync-plugin-1"])
 	assert.Equal(t, "event-2", results["sync-plugin-2"])
-	
+
 	// 测试空插件列表
 	results, err = pm.GetSyncEvents([]string{}, "request", time.Second)
 	require.NoError(t, err)
@@ -837,24 +842,24 @@ func TestPluginManager_GetAllSyncEvents(t *testing.T) {
 	pm := NewPluginManager()
 	plugin1 := NewMockPlugin("all-sync-plugin-1")
 	plugin2 := NewMockPlugin("all-sync-plugin-2")
-	
+
 	err := pm.RegisterPlugin(plugin1)
 	require.NoError(t, err)
 	err = pm.RegisterPlugin(plugin2)
 	require.NoError(t, err)
-	
+
 	ctx := context.Background()
 	err = pm.StartAll(ctx)
 	require.NoError(t, err)
 	defer pm.StopAll()
-	
+
 	// 发送测试事件
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		plugin1.SendEvent("all-event-1")
 		plugin2.SendEvent("all-event-2")
 	}()
-	
+
 	// 测试获取所有插件的同步事件
 	results, err := pm.GetAllSyncEvents("request", time.Second)
 	require.NoError(t, err)
@@ -867,13 +872,13 @@ func TestPluginManager_GetAllSyncEvents(t *testing.T) {
 func TestPluginManager_SupportsSyncEvents(t *testing.T) {
 	pm := NewPluginManager()
 	plugin := NewMockPlugin("support-check-plugin")
-	
+
 	err := pm.RegisterPlugin(plugin)
 	require.NoError(t, err)
-	
+
 	// MockPlugin 应该支持同步事件
 	assert.True(t, pm.SupportsSyncEvents("support-check-plugin"))
-	
+
 	// 不存在的插件应该返回 false
 	assert.False(t, pm.SupportsSyncEvents("non-existent-plugin"))
 }
@@ -883,16 +888,16 @@ func BenchmarkGetSyncEvent(b *testing.B) {
 	pm := NewPluginManager()
 	plugin := NewMockPlugin("bench-sync-plugin")
 	pm.RegisterPlugin(plugin)
-	
+
 	ctx := context.Background()
 	pm.StartAll(ctx)
 	defer pm.StopAll()
-	
+
 	// 预先发送事件到通道
 	for i := 0; i < b.N; i++ {
 		plugin.SendEvent(fmt.Sprintf("event-%d", i))
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		pm.GetSyncEvent("bench-sync-plugin", "request", time.Second)

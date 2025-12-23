@@ -46,7 +46,7 @@ func (ds *defaultSampler) ShouldSample(p sdktrace.SamplingParameters) sdktrace.S
 
 	// 插件逻辑保持原样
 	if ds.be != nil && ds.be.pluginManager != nil {
-		if plugin, ok := ds.be.pluginManager.unsafeGetPlugin("sampler"); ok {
+		if plugin, ok := ds.be.pluginManager.UnsafeGetPlugin("sampler"); ok {
 			pluginResult, err := plugin.SyncEvents(context.Background(), p, time.Second*2)
 			if err == nil {
 				if b, ok := pluginResult.(sdktrace.SamplingResult); ok {
@@ -96,7 +96,7 @@ func (p *defaultSpanProcessor) OnEnd(s sdktrace.ReadOnlySpan) {
 
 	if p.be != nil && p.be.pluginManager != nil {
 		skipCount := 0
-		if plugin, ok := p.be.pluginManager.unsafeGetPlugin("span_processor_end"); ok {
+		if plugin, ok := p.be.pluginManager.UnsafeGetPlugin("span_processor_end"); ok {
 			plugin.SyncEvents(context.Background(), p, time.Second*5)
 		}
 		if skipCount >= 1 {
