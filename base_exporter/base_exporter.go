@@ -21,10 +21,10 @@ type Config struct {
 	// AuthMode AuthMode // auth mode (basic_auth)
 	// UserName string
 	// Password string
-	Environment string
-	ServiceName string
-	Version     string
-
+	Environment      string
+	ServiceName      string
+	Version          string
+	IsEnabled        bool
 	TraceHttpConfig  *OtlpTraceHttpConfig
 	MetricHttpConfig *OtlpMetricHttpConfig
 }
@@ -33,6 +33,7 @@ type BaseExporter struct {
 	Config             *Config
 	TracerExporter     *TracerExporter
 	PrometheusExporter *PrometheusExporter
+	isEnabled          bool
 }
 
 type PrometheusExporter struct {
@@ -62,7 +63,13 @@ func NewBaseExporter(c *Config) *BaseExporter {
 	c.MetricHttpConfig.Environment = c.Environment
 	c.MetricHttpConfig.ServiceName = c.ServiceName
 	c.MetricHttpConfig.Version = c.Version
+	if !c.IsEnabled {
+		return &BaseExporter{
+			Config: c,
+		}
+	}
 	return &BaseExporter{
+		isEnabled:          true,
 		Config:             c,
 		TracerExporter:     NewTracerExporter(c.TraceHttpConfig),
 		PrometheusExporter: NewPrometheus(c.MetricHttpConfig),
@@ -71,6 +78,10 @@ func NewBaseExporter(c *Config) *BaseExporter {
 
 func (be *BaseExporter) GetName() string {
 	return fmt.Sprintf("%s-%s", be.Config.ServiceName, be.Config.Environment)
+}
+
+func (be *BaseExporter) IsEnabled() bool {
+	return be.isEnabled
 }
 
 func FromTraceId(ctx context.Context) string {
