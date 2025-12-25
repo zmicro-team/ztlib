@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
 var _ = sdktrace.AlwaysSample
@@ -49,13 +49,13 @@ func main() {
 	fmt.Println("Recording HTTP request metrics...")
 
 	// 记录成功请求
-	appMetrics.RecordHttpRequest(ctx, "GET", "/api/users", "200", 150*time.Millisecond, false)
-	appMetrics.RecordHttpRequest(ctx, "POST", "/api/users", "201", 300*time.Millisecond, false)
-	appMetrics.RecordHttpRequest(ctx, "GET", "/api/users/123", "200", 100*time.Millisecond, false)
+	appMetrics.RecordHttpRequest(ctx, "GET", "/api/users", 200, 150*time.Millisecond, false)
+	appMetrics.RecordHttpRequest(ctx, "POST", "/api/users", 201, 300*time.Millisecond, false)
+	appMetrics.RecordHttpRequest(ctx, "GET", "/api/users/123", 200, 100*time.Millisecond, false)
 
 	// 记录错误请求
-	appMetrics.RecordHttpRequest(ctx, "GET", "/api/notfound", "404", 50*time.Millisecond, true)
-	appMetrics.RecordHttpRequest(ctx, "POST", "/api/users", "500", 200*time.Millisecond, true)
+	appMetrics.RecordHttpRequest(ctx, "GET", "/api/notfound", 404, 50*time.Millisecond, true)
+	appMetrics.RecordHttpRequest(ctx, "POST", "/api/users", 500, 200*time.Millisecond, true)
 
 	// 计算错误率 (2个错误请求 / 5个总请求 = 40%)
 	appMetrics.RecordHttpError(ctx, 5, 2)

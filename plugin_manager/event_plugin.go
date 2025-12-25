@@ -86,7 +86,7 @@ func (ep *EventPlugin) Start(ctx context.Context) error {
 	ep.running = true
 
 	// 启动事件处理器
-	go ep.eventLoop()
+	// go ep.eventLoop()
 
 	// 启动定时器
 	if ep.config.TickInterval > 0 {
@@ -168,6 +168,13 @@ func (ep *EventPlugin) Events(ctx context.Context, value any) <-chan any {
 	}
 
 	// 直接返回 ep.events 转换为 any 通道
+	/*
+		创建了与 ep.events 相同容量的缓冲通道（默认为100）
+		解耦了生产者和消费者：即使消费者没有及时读取，生产者可以继续填充缓冲
+		可能积累延迟：消费者慢会导致事件在通道中堆积, 直到缓冲满导致后续事件无法写入
+		内存占用较高：如果 ep.events 容量大，每个订阅者都会分配相同大小的内存
+		可能掩盖问题：消费速度慢的问题不会被立即发现
+	*/
 	resultCh := make(chan any, cap(ep.events))
 	go func() {
 		defer close(resultCh)
@@ -187,6 +194,51 @@ func (ep *EventPlugin) Events(ctx context.Context, value any) <-chan any {
 			}
 		}
 	}()
+
+	// 直接返回原始事件的引用，不创建新通道
+	// 让调用者自己处理消费逻辑
+	/*
+				避免内存泄漏：不会无限制积累未处理事件
+				及时发现消费者问题：消费者停止读取会立即阻塞生产者
+				符合Go的通道哲学："不要通过共享内存来通信，而应该通过通信来共享内存"
+				简化背压处理：慢消费者会自动减慢生产者速度
+
+				假设 ep.events 容量为100
+		    	创建多个订阅者，每个都有100容量的缓冲
+
+				场景1：快速生产者，慢消费者
+				- 生产者快速填充 ep.events (100个事件)
+				- 每个订阅者的 resultCh 也填充100个事件
+				- 内存占用: 100个事件 × (订阅者数量 + 1) 个副本
+
+				场景2：消费者崩溃或未读取
+				- resultCh 被填满后，发送会阻塞
+				- 但 ep.events 仍然可以继续接收新事件
+				- 订阅者goroutine会卡在 resultCh <- event
+				- 不会影响其他订阅者
+	*/
+	// 启动一个goroutine从ep.events读取并转发
+	// resultCh := make(chan any)
+	// go func() {
+	// 	defer close(resultCh)
+
+	// 	for {
+	// 		select {
+	// 		case event, ok := <-ep.events:
+	// 			if !ok {
+	// 				return
+	// 			}
+	// 			select {
+	// 			case resultCh <- event:
+	// 				// 成功发送，继续
+	// 			case <-ctx.Done():
+	// 				return
+	// 			}
+	// 		case <-ctx.Done():
+	// 			return
+	// 		}
+	// 	}
+	// }()
 
 	return resultCh
 }
@@ -352,7 +404,7 @@ func findIndex(s string, sep string) int {
 	return -1
 }
 
-// 内部方法：事件循环
+// 内部方法：事件循环(后续可用做拓展)
 func (ep *EventPlugin) eventLoop() {
 	for {
 		select {
@@ -362,7 +414,7 @@ func (ep *EventPlugin) eventLoop() {
 	}
 }
 
-// 内部方法：定时事件循环
+// 内部方法：定时事件循环(心跳)
 func (ep *EventPlugin) tickLoop() {
 	if ep.ticker == nil {
 		return

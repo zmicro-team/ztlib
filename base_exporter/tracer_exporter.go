@@ -55,6 +55,35 @@ type SamplingCall func(p sdktrace.SamplingParameters) (*sdktrace.SamplingResult,
 
 type SpanProcessorEndCall func(s sdktrace.ReadOnlySpan) bool
 
+/*
+
+	// exporter.TracerExporter.AddSamplingCall(func(params sdktrace.SamplingParameters) (*sdktrace.SamplingResult, error) {
+	// 	// 检查是否有特定的业务属性
+	// 	fmt.Println("call sampling")
+	// 	return nil, nil
+	// })
+	// exporter.TracerExporter.AddSpanProcessorEndCall(func(s sdktrace.ReadOnlySpan) bool {
+	// 	for _, attr := range s.Attributes() {
+	// 		if attr.Key == semconv.HTTPStatusCodeKey ||
+	// 			attr.Key == semconv2.HTTPResponseStatusCodeKey {
+	// 			statusCode := attr.Value.AsInt64()
+	// 			if statusCode >= 400 {
+	// 				// 使用新的导出器导出错误
+	// 				tracer := errTracerProvider.Tracer("gin")
+	// 				ctx := context.Background()
+	// 				ctx, span := tracer.Start(ctx, "error", trace.WithAttributes(attr))
+	// 				tid := s.Parent().TraceID()
+	// 				span.SetAttributes(attribute.String("trace_id", tid.String()))
+	// 				span.SetStatus(codes.Error, "error")
+	// 				span.End()
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
+	// })
+*/
+
 // tracer_exporter
 func NewTracerExporter(c *OtlpTraceHttpConfig) *TracerExporter {
 	var ctx = context.Background()

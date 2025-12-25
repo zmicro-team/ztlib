@@ -247,6 +247,7 @@ func TestEventPlugin_UpdateConfig(t *testing.T) {
 // TestEventPlugin_TickEvents 测试定时事件
 func TestEventPlugin_TickEvents(t *testing.T) {
 	config := DefaultEventPluginConfig()
+	config.EventBufferSize = 2
 	config.TickInterval = time.Millisecond * 50 // 快速测试
 	plugin := NewEventPlugin("tick-test-plugin", config)
 
@@ -264,7 +265,7 @@ func TestEventPlugin_TickEvents(t *testing.T) {
 	tickCount := 0
 	timeout := time.After(time.Second * 2)
 
-	for tickCount < 3 {
+	for tickCount < 10 {
 		select {
 		case event := <-eventCh:
 			if e, ok := event.(Event); ok && e.Type == EventTypeTick {

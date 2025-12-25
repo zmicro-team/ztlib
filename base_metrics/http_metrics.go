@@ -26,19 +26,19 @@ import (
 */
 
 type AppMetrics struct {
-	meter                     *sdkmetric.MeterProvider
-	httpRequestsTotal         metric.Int64Counter
-	httpErrorRate             metric.Float64Gauge
-	httpRequestDuration       metric.Float64Histogram
-	AppName                   string
-	Version                   string
-	Cluster                   string
-	Namespace                 string
+	meter               *sdkmetric.MeterProvider
+	httpRequestsTotal   metric.Int64Counter
+	httpErrorRate       metric.Float64Gauge
+	httpRequestDuration metric.Float64Histogram
+	AppName             string
+	Version             string
+	Cluster             string
+	Namespace           string
 }
 
 func NewAppMetrics(meterProvider *sdkmetric.MeterProvider, appName, version, cluster, namespace string) (*AppMetrics, error) {
 	meter := meterProvider.Meter(appName)
-	
+
 	// HTTP 请求总数
 	httpRequestsTotal, err := meter.Int64Counter(
 		"http_requests_total",
@@ -70,19 +70,19 @@ func NewAppMetrics(meterProvider *sdkmetric.MeterProvider, appName, version, clu
 	}
 
 	return &AppMetrics{
-		meter:                     meterProvider,
-		httpRequestsTotal:         httpRequestsTotal,
-		httpErrorRate:             httpErrorRate,
-		httpRequestDuration:       httpRequestDuration,
-		AppName:                   appName,
-		Version:                   version,
-		Cluster:                   cluster,
-		Namespace:                 namespace,
+		meter:               meterProvider,
+		httpRequestsTotal:   httpRequestsTotal,
+		httpErrorRate:       httpErrorRate,
+		httpRequestDuration: httpRequestDuration,
+		AppName:             appName,
+		Version:             version,
+		Cluster:             cluster,
+		Namespace:           namespace,
 	}, nil
 }
 
 // RecordHttpRequest 记录HTTP请求指标
-func (am *AppMetrics) RecordHttpRequest(ctx context.Context, method, path, code string, duration time.Duration, isClientError bool) {
+func (am *AppMetrics) RecordHttpRequest(ctx context.Context, method, path string, code int, duration time.Duration, isClientError bool) {
 	// 基础属性
 	commonAttrs := []attribute.KeyValue{
 		attribute.String("app", am.AppName),
@@ -91,7 +91,7 @@ func (am *AppMetrics) RecordHttpRequest(ctx context.Context, method, path, code 
 		attribute.String("namespace", am.Namespace),
 		attribute.String("method", method),
 		attribute.String("path", path),
-		attribute.String("status_code", code),
+		attribute.Int("status_code", code),
 	}
 
 	// 记录请求总数
@@ -101,7 +101,7 @@ func (am *AppMetrics) RecordHttpRequest(ctx context.Context, method, path, code 
 	am.httpRequestDuration.Record(ctx, duration.Seconds(), metric.WithAttributes(commonAttrs...))
 }
 
-// RecordHttpError 计算并记录HTTP错误率
+// RecordHttpError 计算并记录HTTP错误率 一般不用统计，直接使用平台聚合后计算,例如prometheus rate(http_requests_total{status_code=~"4..|5.."}[5m]) / rate(http_requests_total[5m]) * 100
 func (am *AppMetrics) RecordHttpError(ctx context.Context, totalRequests, errorRequests int64) {
 	errorRate := float64(0)
 	if totalRequests > 0 {
@@ -127,4 +127,3 @@ func (am *AppMetrics) GetCommonAttributes() []attribute.KeyValue {
 		attribute.String("namespace", am.Namespace),
 	}
 }
-
