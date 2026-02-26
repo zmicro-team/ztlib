@@ -84,38 +84,36 @@ func isLeapYear(year int) bool {
 	return (year%4 == 0 && year%100 != 0) || year%400 == 0
 }
 
-// CheckBirthdayValid 验证身份证中的出生日期是否有效
-func CheckBirthdayValid(year, month, day int) bool {
-	// 基本日期范围检查
-	if year < 1900 || month <= 0 || month > 12 || day <= 0 || day > 31 {
+// CheckBirthdayValid 验证出生日期是否合法
+func CheckBirthdayValid(nYear, nMonth, nDay int) bool {
+	// 基本范围检查
+	if nYear < 1900 || nMonth < 1 || nMonth > 12 || nDay < 1 || nDay > 31 {
 		return false
 	}
 
-	// 检查是否未来日期
-	now := time.Now()
-	if year > now.Year() ||
-		(year == now.Year() && month > int(now.Month())) ||
-		(year == now.Year() && month == int(now.Month()) && day > now.Day()) {
-		return false
-	}
-
-	// 检查各月份的天数
-	switch month {
-	case 2: // 二月特殊处理
-		if isLeapYear(year) {
-			if day > 29 {
-				return false
-			}
-		} else if day > 28 {
+	// 不能晚于当前日期
+	curYear, curMonth, curDay := time.Now().Date()
+	if nYear == curYear {
+		if nMonth > int(curMonth) {
 			return false
-		}
-	case 4, 6, 9, 11: // 30天的月份
-		if day > 30 {
+		} else if nMonth == int(curMonth) && nDay > curDay {
 			return false
 		}
 	}
 
-	return true
+	// 根据月份判断最大天数
+	monthDays := 31
+	switch nMonth {
+	case 4, 6, 9, 11:
+		monthDays = 30
+	case 2:
+		if isLeapYear(nYear) {
+			monthDays = 29
+		} else {
+			monthDays = 28
+		}
+	}
+	return nDay <= monthDays
 }
 
 // CheckProvinceValid 检查省份代码是否有效

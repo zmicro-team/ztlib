@@ -136,3 +136,9 @@ func TestCheckBirthdayValid(t *testing.T) {
 		})
 	}
 }
+
+func TestIsValidItem(t *testing.T) {
+	s := "411122198802298193"
+	t.Log(len(s))
+	t.Log(IsValidCitizenNo("41112219880229819"))
+}
